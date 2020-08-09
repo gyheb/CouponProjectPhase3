@@ -187,12 +187,16 @@ public class AdminController {
 	}
 	
 // ========================================= GET ONE CUSTOMER ================================== \\
-	@GetMapping("/{token}/Company/{id}")
+	@GetMapping("/{token}/{id}")
 	public ResponseEntity<?> getOneCompany(@PathVariable String token, @RequestBody long id) throws CompanyNotFoundException {
 		Session session = sessions.get(token);
+		System.out.println("Session 1comp: " + session);
 		if(session != null && session.getService() instanceof ManagerFacade) {
+			System.out.println("comp 1");
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
+				System.out.println("comp 2");
 				session.setLastAccessed(System.currentTimeMillis());
+				System.out.println("comp 3");
 				return ResponseEntity.ok(((ManagerFacade)session.getService()).getOneCompany(id));
 						
 			}

@@ -92,6 +92,17 @@ public class CustomerFacade extends ClientFacade {
 		return coupons;
 	}
 	
+	// =================== get all coupons existed ============== \\
+	
+	public List<Coupon> getAllSystemCoupons() throws CustomerNotFoundException {
+		custRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
+		List<Coupon> coupons = new ArrayList<Coupon>();
+		for (Coupon coup : coupRepo.findAll()) {
+			coupons.add(coup);
+		}
+		return coupons;
+	}
+	
 	// ====================== get coupons by ==================== \\
 	
 	public List<Coupon> getCouponsByCategory(CategoryType type) throws CustomerNotFoundException {

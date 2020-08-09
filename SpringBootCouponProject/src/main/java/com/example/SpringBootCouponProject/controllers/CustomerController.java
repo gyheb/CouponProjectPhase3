@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,13 +32,18 @@ public class CustomerController {
 //	}
 	
 // ========================================= PURCHASE COUPON ================================== \\
-		@PutMapping("/{token}")
+		@PostMapping("/{token}")
 		public ResponseEntity<?> purchaseCoupon(@PathVariable String token, @RequestBody Coupon coupon) throws CouponExistsException, CustomerNotFoundException, CouponExpiredOrNoLongerInStockException {
 			Session session = sessions.get(token);
+			System.out.println("session p: " + session);
 			if(session != null && session.getService() instanceof CustomerFacade) {
+				System.out.println("part 1");
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
+					System.out.println("part 2");
 					session.setLastAccessed(System.currentTimeMillis()); 
+					System.out.println("part 3");
 					((CustomerFacade)session.getService()).purchaseCoupon(coupon);
+					System.out.println("part 4");
 					return ResponseEntity.ok(coupon);
 						
 				}
@@ -47,7 +52,7 @@ public class CustomerController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
 	    }
 	
-// ========================================= GET ALL COUPONS ================================== \\
+// ========================================= GET ALL CUSTOMER COUPONS ================================== \\
 		@GetMapping("/{token}/AllCoupons")
 		public ResponseEntity<?> getAllCoupons(@PathVariable String token) throws CustomerNotFoundException {
 			Session session = sessions.get(token);
@@ -56,6 +61,21 @@ public class CustomerController {
 					session.setLastAccessed(System.currentTimeMillis()); 
 					return ResponseEntity.ok(((CustomerFacade)session.getService()).getAllCoupons());
 					
+				}
+				
+			}
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
+		}
+		
+// ========================================= GET ALL SYSTEM COUPONS ================================== \\
+		@GetMapping("/{token}/AllSystemCoupons")
+		public ResponseEntity<?> getAllSystemCoupons(@PathVariable String token) throws CustomerNotFoundException {
+			Session session = sessions.get(token);
+			if(session != null && session.getService() instanceof CustomerFacade) {
+				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
+					session.setLastAccessed(System.currentTimeMillis()); 
+					return ResponseEntity.ok(((CustomerFacade)session.getService()).getAllSystemCoupons());
+						
 				}
 				
 			}
