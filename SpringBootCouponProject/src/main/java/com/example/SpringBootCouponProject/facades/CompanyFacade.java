@@ -10,6 +10,7 @@ import com.example.SpringBootCouponProject.beans.Customer;
 import com.example.SpringBootCouponProject.facades.exceptions.CannotUpdateCouponIdOrCompanyIdException;
 import com.example.SpringBootCouponProject.facades.exceptions.CompanyNotFoundException;
 import com.example.SpringBootCouponProject.facades.exceptions.CouponExistsException;
+import com.example.SpringBootCouponProject.facades.exceptions.CouponExpiredOrNoLongerInStockException;
 
 @Service // Component
 public class CompanyFacade extends ClientFacade {
@@ -91,6 +92,13 @@ public class CompanyFacade extends ClientFacade {
 				}
 			}			
 		}
+		coupRepo.deleteById(couponId);
+	}
+	
+	// =================== get company from coupon ================ \\
+	
+	public Company getCompanyFromCoupon(long couponId) throws CouponExpiredOrNoLongerInStockException {
+		return coupRepo.findById(couponId).orElseThrow(CouponExpiredOrNoLongerInStockException::new).getCompany();
 	}
 	
 	// ================= get one coupon ================ \\ 
@@ -154,6 +162,7 @@ public class CompanyFacade extends ClientFacade {
 		}
 		return coupons;
 	}
+	
 	
 	// =================== get company details ================ \\
 	

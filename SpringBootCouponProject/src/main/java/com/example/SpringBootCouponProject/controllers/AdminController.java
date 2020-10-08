@@ -31,6 +31,7 @@ public class AdminController {
 	@Autowired
 	private Map<String, Session> sessions;
 	
+	// another way of doing it
 //	public AdminController(Map<String, Session> sessions) {
 //		super();
 //		this.sessions = sessions;
@@ -74,7 +75,7 @@ public class AdminController {
 
 // ========================================= DELETE CUSTOMER ================================== \\
 	@DeleteMapping("/{token}/Customer/{id}")
-	public ResponseEntity<?> deleteCustomer (@PathVariable String token, @RequestBody long id) throws CustomerNotFoundException {
+	public ResponseEntity<?> deleteCustomer (@PathVariable String token, @PathVariable long id) throws CustomerNotFoundException {
 		Session session = sessions.get(token);
 		if(session != null && session.getService() instanceof ManagerFacade) {
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -91,7 +92,7 @@ public class AdminController {
 	
 // ========================================= DELETE COMPANY ================================== \\
 	@DeleteMapping("/{token}/Company/{id}")
-	public ResponseEntity<?> deleteCompany (@PathVariable String token, @RequestBody long id) throws CompanyNotFoundException  {
+	public ResponseEntity<?> deleteCompany (@PathVariable String token, @PathVariable long id) throws CompanyNotFoundException  {
 		Session session = sessions.get(token);
 		if(session != null && session.getService() instanceof ManagerFacade) {
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -146,8 +147,7 @@ public class AdminController {
 		Session session = sessions.get(token);
 		if(session != null && session.getService() instanceof ManagerFacade) {
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
-				session.setLastAccessed(System.currentTimeMillis()); 
-				System.out.println(((ManagerFacade)session.getService()).getAllCompanies());
+				session.setLastAccessed(System.currentTimeMillis());
 				return ResponseEntity.ok(((ManagerFacade)session.getService()).getAllCompanies());
 				
 			}
@@ -173,7 +173,7 @@ public class AdminController {
 	
 // ========================================= GET ONE CUSTOMER ================================== \\
 	@GetMapping("/{token}/Customer/{id}")
-	public ResponseEntity<?> getOneCustomer(@PathVariable String token, @RequestBody long id) throws CustomerNotFoundException {
+	public ResponseEntity<?> getOneCustomer(@PathVariable String token, @PathVariable long id) throws CustomerNotFoundException {
 		Session session = sessions.get(token);
 		if(session != null && session.getService() instanceof ManagerFacade) {
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -186,22 +186,24 @@ public class AdminController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
 	}
 	
-// ========================================= GET ONE CUSTOMER ================================== \\
+// ========================================= GET ONE COMPANY ================================== \\
 	@GetMapping("/{token}/{id}")
-	public ResponseEntity<?> getOneCompany(@PathVariable String token, @RequestBody long id) throws CompanyNotFoundException {
+	public ResponseEntity<?> getOneCompany(@PathVariable String token, @PathVariable long id) throws CompanyNotFoundException {
 		Session session = sessions.get(token);
-		System.out.println("Session 1comp: " + session);
 		if(session != null && session.getService() instanceof ManagerFacade) {
-			System.out.println("comp 1");
 			if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
-				System.out.println("comp 2");
 				session.setLastAccessed(System.currentTimeMillis());
-				System.out.println("comp 3");
 				return ResponseEntity.ok(((ManagerFacade)session.getService()).getOneCompany(id));
 						
 			}
 					
 		}
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
+	}
+	
+// ========================================= LOGOUT ================================== \\
+	@PostMapping("logout")
+	public void logout(@RequestBody String token){
+		sessions.remove(token);
 	}
 }

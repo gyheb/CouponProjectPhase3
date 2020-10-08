@@ -16,7 +16,7 @@ public class Company {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private long companyId;
 	@Column
 	private String name;
 	@Column
@@ -37,7 +37,7 @@ public class Company {
 
 	@Override
 	public String toString() {
-		return "Company [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + "]";
+		return "Company [id=" + companyId + ", name=" + name + ", email=" + email + ", password=" + password + "]";
 	}
 
 	public String getName() {
@@ -73,7 +73,7 @@ public class Company {
 	}
 
 	public long getCompanyId() {
-		return id;
+		return companyId;
 	}
 
 }

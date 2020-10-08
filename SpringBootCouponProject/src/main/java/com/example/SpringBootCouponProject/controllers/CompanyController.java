@@ -18,6 +18,7 @@ import com.example.SpringBootCouponProject.facades.CompanyFacade;
 import com.example.SpringBootCouponProject.facades.exceptions.CannotUpdateCouponIdOrCompanyIdException;
 import com.example.SpringBootCouponProject.facades.exceptions.CompanyNotFoundException;
 import com.example.SpringBootCouponProject.facades.exceptions.CouponExistsException;
+import com.example.SpringBootCouponProject.facades.exceptions.CouponExpiredOrNoLongerInStockException;
 
 @RestController
 @RequestMapping("company")
@@ -58,7 +59,7 @@ public class CompanyController {
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
 					session.setLastAccessed(System.currentTimeMillis());
 					((CompanyFacade)session.getService()).updateCoupon(coupon);
-					return ResponseEntity.ok(coupon);
+					return ResponseEntity.ok("Coupon info updated!");
 					
 				}
 				
@@ -69,7 +70,7 @@ public class CompanyController {
 		
 	// ========================================= DELETE COUPON ================================== \\
 		@DeleteMapping("/{token}/Coupon/{id}")
-		public ResponseEntity<?> deleteCoupon (@PathVariable String token, @RequestBody long id) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
+		public ResponseEntity<?> deleteCoupon (@PathVariable String token, @PathVariable long id) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
 			Session session = sessions.get(token);
 			if(session != null && session.getService() instanceof CompanyFacade) {
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -83,10 +84,40 @@ public class CompanyController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
 			
 		}
+	// ========================================= GET COMPANY FROM COUPON ================================== \\
+		
+		@GetMapping("/{token}/{id}")
+		public ResponseEntity<?> getCompanyFromCoupon(@PathVariable String token, @PathVariable int id) throws CouponExpiredOrNoLongerInStockException{
+			Session session = sessions.get(token);
+			if(session != null && session.getService() instanceof CompanyFacade) {
+				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
+					session.setLastAccessed(System.currentTimeMillis());
+					return ResponseEntity.ok(((CompanyFacade)session.getService()).getCompanyFromCoupon(id));
+					
+				}
+				
+			}
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
+		}
+		
+	// ========================================= GET CUSTOMERS FROM COUPON ================================== \\
+		
+		@GetMapping("/custsfromcoupon/{token}/{coupId}")
+		public ResponseEntity<?> getCustsFromCoupon(@PathVariable String token, @PathVariable int coupId) {
+			Session session = sessions.get(token);
+			if(session != null && session.getService() instanceof CompanyFacade) {
+				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
+					session.setLastAccessed(System.currentTimeMillis());
+					return ResponseEntity.ok(((CompanyFacade)session.getService()).getOneCoupon(coupId).getCustomers());
+				}
+			}
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
+		}
+		
 		
 	// ========================================= GET ONE COUPON ================================== \\
 		@GetMapping("/{token}/Coupon/{id}")
-		public ResponseEntity<?> getOneCoupon (@PathVariable String token, @RequestBody long id) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
+		public ResponseEntity<?> getOneCoupon (@PathVariable String token, @PathVariable long id) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
 			Session session = sessions.get(token);
 			if(session != null && session.getService() instanceof CompanyFacade) {
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -118,7 +149,7 @@ public class CompanyController {
 		
 	// ========================================= GET COUPONS BY CATEGORY ================================== \\
 		@GetMapping("/{token}/CouponsByCategory/{type}")
-		public ResponseEntity<?> getCouponsByCategory (@PathVariable String token, @RequestBody CategoryType type) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
+		public ResponseEntity<?> getCouponsByCategory (@PathVariable String token, @PathVariable CategoryType type) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
 			Session session = sessions.get(token);
 			if(session != null && session.getService() instanceof CompanyFacade) {
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -134,7 +165,7 @@ public class CompanyController {
 		
 	// ========================================= GET COUPONS UP TO PRICE ================================== \\
 		@GetMapping("/{token}/CouponsUpToPrice/{price}")
-		public ResponseEntity<?> getCouponsUpToPrice (@PathVariable String token, @RequestBody double price) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
+		public ResponseEntity<?> getCouponsUpToPrice (@PathVariable String token, @PathVariable double price) throws CompanyNotFoundException, CannotUpdateCouponIdOrCompanyIdException {
 			Session session = sessions.get(token);
 			if(session != null && session.getService() instanceof CompanyFacade) {
 				if(System.currentTimeMillis() - session.getLastAccessed() < 1000*60*10) {
@@ -162,5 +193,11 @@ public class CompanyController {
 			}
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unautorized access...");
 			
+		}
+		
+	// ========================================= LOGOUT ================================== \\
+		@PostMapping("logout")
+		public void logout(@RequestBody String token){
+			sessions.remove(token);
 		}
 }

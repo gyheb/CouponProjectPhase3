@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.example.SpringBootCouponProject.beans.CategoryType;
+import com.example.SpringBootCouponProject.beans.Company;
 import com.example.SpringBootCouponProject.beans.Coupon;
 import com.example.SpringBootCouponProject.beans.Customer;
 import com.example.SpringBootCouponProject.facades.exceptions.CouponExistsException;
@@ -56,6 +57,7 @@ public class CustomerFacade extends ClientFacade {
 			
 		}
 					
+		coupon = coupRepo.findById(coupon.getCouponId()).get();
 		if(coupon.getAmount() > 0 && coupon.getEndDate().after(new Date(cal.getTimeInMillis()))) {
 			coupon.getCustomers().add(c);
 			coupon.setAmount(coupon.getAmount()-1);
@@ -92,6 +94,12 @@ public class CustomerFacade extends ClientFacade {
 		return coupons;
 	}
 	
+	// =================== get company from coupon ================ \\
+	
+	public Company getCompanyFromCoupon(long couponId) throws CouponExpiredOrNoLongerInStockException {
+		return coupRepo.findById(couponId).orElseThrow(CouponExpiredOrNoLongerInStockException::new).getCompany();
+	}
+	
 	// =================== get all coupons existed ============== \\
 	
 	public List<Coupon> getAllSystemCoupons() throws CustomerNotFoundException {
@@ -108,7 +116,7 @@ public class CustomerFacade extends ClientFacade {
 	public List<Coupon> getCouponsByCategory(CategoryType type) throws CustomerNotFoundException {
 		Customer c = custRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
 		List<Coupon> coupons = new ArrayList<Coupon>();
-		for (Coupon coup : c.getCoupons()) {
+		for (Coupon coup : coupRepo.findAll()) {
 			if(coup.getType().equals(type))
 			coupons.add(coup);
 		}
@@ -118,7 +126,7 @@ public class CustomerFacade extends ClientFacade {
 	public List<Coupon> getCouponsUpToPrice(double price) throws CustomerNotFoundException {
 		Customer c = custRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
 		List<Coupon> coupons = new ArrayList<Coupon>();
-		for (Coupon coup : c.getCoupons()) {
+		for (Coupon coup : coupRepo.findAll()) {
 			if(coup.getPrice() <= price)
 			coupons.add(coup);
 		}
